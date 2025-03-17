@@ -11,11 +11,18 @@ class ChatControrller extends Controller
 {
     public function chatForm($user_id ,UserServices $user_services)
     {
-      //  $users = User::latest()->where('id', '<>', auth()->id())->get();
-        $receiver=$user_services->getUser($user_id);
+        $users=User::where('id', '<>', auth()->id())->select( 'id' , 'name')->get();
+        $receiver = $user_services->getUser($user_id);
+        $user_id = auth()->id();
 
-       return view('Chat.chat', compact('receiver'));
+        // Fetch chat history between authenticated user and receiver
+        $messages = Message::where(function ($query) use ($user_id, $receiver) {
+            $query->where('sender', $user_id)->where('receiver', $receiver->id);
+        })->orWhere(function ($query) use ($user_id, $receiver) {
+            $query->where('sender', $receiver->id)->where('receiver', $user_id);
+        })->orderBy('created_at', 'ASC')->get();
 
+        return view('Chat.chat', compact('receiver', 'messages' ,'users'));
     }
 
     public function sendMessages($user_id ,Request $request ,UserServices $user_services)

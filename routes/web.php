@@ -42,7 +42,10 @@ Route::get('/', function () {
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware(['verified']);
 
 // chat
-Route::get('/chatForm/{user_id}' , [ChatControrller::class ,'chatForm'])->middleware('auth');
+Route::get('/get-users', function () {
+    return response()->json(['users' => \App\Models\User::all()]);
+});
+Route::get('/chat/{user_id}' , [ChatControrller::class ,'chatForm'])->middleware('auth');
 Route::post('/chat/{user_id}' , [ChatControrller::class ,'sendMessages'])->middleware('auth');
 
 // send sms by TWILIO
